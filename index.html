@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4f46e5">
+<meta name="description" content="Переводит баллы в оценку по 5, 10, 12, 20, 100-балльной или своей системе. Средний балл, история, таблица порогов.">
+<title>Оценка+ — калькулятор оценок и среднего балла</title>
+<link rel="manifest" href='data:application/manifest+json,{"name":"Оценка+","short_name":"Оценка+","start_url":".","display":"standalone","background_color":"%234f46e5","theme_color":"%234f46e5","lang":"ru"}'>
+<style>
+:root{--bg:#f3f4fb;--card:#fff;--tx:#1e2340;--tx2:#6b7194;--pr:#4f46e5;--pr2:#818cf8;--ok:#10b981;--bad:#ef4444;--bd:#e4e6f3;--r:18px}
+:root[data-theme=dark]{--bg:#0d1020;--card:#181c33;--tx:#f1f2ff;--tx2:#9aa0c7;--bd:#2a2f52}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:var(--bg);color:var(--tx);padding:env(safe-area-inset-top) 0 0}
+.app{max-width:480px;margin:0 auto;height:100%;display:flex;flex-direction:column}
+header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 8px}
+header h1{font-size:1.35rem;font-weight:800}header h1 span{color:var(--pr)}
+header p{font-size:.78rem;color:var(--tx2)}
+.ib{width:42px;height:42px;border-radius:50%;border:1px solid var(--bd);background:var(--card);color:var(--tx);font-size:1.1rem;cursor:pointer}
+main{flex:1;overflow-y:auto;padding:8px 16px 16px}
+.tab{display:none;animation:in .25s}.tab.on{display:block}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin-bottom:14px;box-shadow:0 6px 20px -10px rgba(79,70,229,.25)}
+.row{display:flex;gap:10px}.row>*{flex:1;min-width:0}
+label{display:block;font-size:.78rem;font-weight:600;color:var(--tx2);margin-bottom:5px}
+input,select{width:100%;padding:13px;font-size:1rem;border:1px solid var(--bd);border-radius:12px;background:var(--bg);color:var(--tx);outline:none}
+input:focus,select:focus{border-color:var(--pr);box-shadow:0 0 0 3px rgba(79,70,229,.18)}
+.g{margin-bottom:12px}.hide{display:none}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{padding:8px 13px;border-radius:99px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font-size:.85rem;cursor:pointer}
+.chip.on{background:var(--pr);border-color:var(--pr);color:#fff}
+.res{background:linear-gradient(135deg,var(--pr),var(--pr2));color:#fff;border-radius:var(--r);padding:20px;text-align:center;box-shadow:0 12px 28px -10px rgba(79,70,229,.6);margin-bottom:14px}
+.res small{font-size:.72rem;letter-spacing:1px;text-transform:uppercase;opacity:.85}
+.big{font-size:3.2rem;font-weight:800;line-height:1.1;margin:6px 0}
+.big i{font-size:1.2rem;font-style:normal;opacity:.7;font-weight:600}
+.bar{height:8px;border-radius:4px;background:rgba(255,255,255,.28);overflow:hidden;margin:10px 0}
+.bar div{height:100%;width:0;background:#fff;border-radius:4px;transition:width .4s}
+.det{display:flex;justify-content:space-around;font-size:.85rem;border-top:1px solid rgba(255,255,255,.25);padding-top:10px}
+.hint{font-size:.85rem;margin-top:10px;opacity:.95}
+.err{color:var(--bad);font-size:.8rem;margin:-4px 0 10px}
+.btns{display:flex;gap:8px;margin-top:14px}
+.btn{flex:1;padding:12px;border-radius:12px;border:0;font-size:.9rem;font-weight:600;cursor:pointer;background:rgba(255,255,255,.2);color:#fff}
+.btn.s{background:var(--pr);color:#fff}.btn.o{background:var(--bg);color:var(--tx);border:1px solid var(--bd)}
+.btn:active,.chip:active{transform:scale(.97)}
+h2{font-size:.95rem;margin-bottom:10px}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+td{padding:8px 4px;border-bottom:1px solid var(--bd)}td:last-child{text-align:right;color:var(--tx2)}
+tr.cur td{background:rgba(79,70,229,.12);font-weight:700;color:var(--tx)}
+tr:last-child td{border:0}
+.li{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--bd)}
+.li:last-child{border:0}.li div{flex:1;min-width:0}.li b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.li small{color:var(--tx2);font-size:.75rem}
+.x{background:none;border:0;color:var(--tx2);font-size:1.2rem;cursor:pointer;padding:6px}
+.badge{background:var(--pr);color:#fff;border-radius:10px;padding:4px 10px;font-weight:700;font-size:.9rem;white-space:nowrap}
+.empty{text-align:center;color:var(--tx2);padding:26px 10px;font-size:.9rem}
+.avg{display:flex;gap:10px}.avg .card{flex:1;text-align:center;margin:0}.avg b{font-size:1.8rem;color:var(--pr)}.avg small{display:block;color:var(--tx2);font-size:.72rem}
+nav{display:flex;background:var(--card);border-top:1px solid var(--bd);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+nav button{flex:1;background:none;border:0;color:var(--tx2);font-size:.72rem;padding:6px;cursor:pointer;display:flex;flex-direction:column;gap:2px;align-items:center}
+nav button span{font-size:1.35rem}nav button.on{color:var(--pr);font-weight:700}
+.info{font-size:.84rem;line-height:1.5;color:var(--tx2)}.info b{color:var(--tx)}
+.info p+p{margin-top:8px}
+details summary{cursor:pointer;font-weight:700;font-size:.95rem;color:var(--tx);list-style:none}
+details summary::after{content:' ▾';color:var(--pr)}details[open] summary::after{content:' ▴'}
+details .info{margin-top:10px}
+.formula{background:var(--bg);border:1px dashed var(--pr2);border-radius:12px;padding:12px;font-size:.88rem;line-height:1.6;word-break:break-word;color:var(--tx)}
+.formula b{color:var(--pr)}
+.hl{font-size:.72rem;color:var(--tx2);margin-top:4px}
+.ok{color:var(--ok);font-weight:600}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);background:var(--tx);color:var(--bg);padding:10px 18px;border-radius:99px;font-size:.85rem;opacity:0;pointer-events:none;transition:.25s}
+.toast.on{opacity:1;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div><h1>Оценка<span>+</span></h1><p>Баллы → оценка за секунду</p></div>
+  <button class="ib" id="theme" aria-label="Сменить тему">🌓</button>
+</header>
+<main>
+<section class="tab on" id="t-calc">
+  <div class="card">
+    <div class="row g">
+      <div><label for="x">Получено</label><input id="x" inputmode="decimal" placeholder="13" autocomplete="off"></div>
+      <div><label for="y">Максимум</label><input id="y" inputmode="decimal" placeholder="15" autocomplete="off"></div>
+    </div>
+    <div class="err hide" id="err">Получено больше максимума — проверьте числа</div>
+    <label>Система оценивания</label>
+    <div class="chips g" id="scales"></div>
+    <div class="g hide" id="cg"><label for="cm">Максимальная оценка</label><input id="cm" inputmode="decimal" placeholder="Например: 7"></div>
+    <label>Округление</label>
+    <div class="chips" id="modes"></div>
+  </div>
+  <div class="res">
+    <small>Итоговая оценка</small>
+    <div class="big" id="grade">–</div>
+    <div class="bar"><div id="bar"></div></div>
+    <div class="det"><span>Точно: <b id="exact">–</b></span><span>Процент: <b id="pct">–</b></span></div>
+    <div class="hint" id="hint"></div>
+    <div class="btns">
+      <button class="btn" id="save">💾 В историю</button>
+      <button class="btn" id="toSub">➕ В предметы</button>
+      <button class="btn" id="share">📤</button>
+    </div>
+  </div>
+  <div class="card hide" id="thrCard"><h2>Сколько баллов нужно для оценки</h2><table id="thr"></table></div>
+</section>
+
+<section class="tab" id="t-gpa">
+  <div class="card"><details open><summary>Как это работает</summary>
+    <div class="info">
+      <p>Здесь вы собираете оценки по предметам и получаете <b>средний балл</b>. Можно добавить оценку вручную или отправить её сюда с вкладки «Расчёт» кнопкой «➕ В предметы».</p>
+      <p><b>Вес</b> — насколько предмет важен: количество часов, кредитов или коэффициент контрольной. Предмет с весом 2 влияет на среднее вдвое сильнее, чем с весом 1. Если вес не нужен, оставьте поле пустым — он будет равен 1.</p>
+      <p><b>Все оценки должны быть в одной системе</b> (например, все по 10-балльной), иначе среднее будет некорректным.</p>
+    </div></details></div>
+  <div class="avg">
+    <div class="card"><b id="avgW">–</b><small>Средневзвешенный</small><div class="hl">Учитывает вес каждого предмета</div></div>
+    <div class="card"><b id="avgS">–</b><small>Простое среднее</small><div class="hl">Все предметы считаются равными</div></div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h2>Как посчитано</h2>
+    <div class="formula" id="formula">Добавьте хотя бы один предмет — здесь появится пошаговый расчёт с вашими числами.</div>
+  </div>
+  <div class="card">
+    <h2>Добавить предмет</h2>
+    <div class="g"><label for="sn">Название</label><input id="sn" placeholder="Например, Алгебра" maxlength="40"></div>
+    <div class="row g">
+      <div><label for="sg">Оценка</label><input id="sg" inputmode="decimal" placeholder="8"></div>
+      <div><label for="sw">Вес (необязательно)</label><input id="sw" inputmode="decimal" placeholder="1"></div>
+    </div>
+    <button class="btn s" style="width:100%" id="addSub">Добавить</button>
+  </div>
+  <div class="card"><h2>Ваши предметы</h2><div id="subs"></div>
+    <div class="hl" id="subsHint"></div></div>
+  <div class="card">
+    <h2>💾 Хранение данных</h2>
+    <div class="info">
+      <p class="ok" id="stamp">✅ Автосохранение включено</p>
+      <p>Всё сохраняется <b>только на вашем устройстве</b> и сразу после каждого изменения. Данные никуда не отправляются и работают без интернета.</p>
+      <p>Если очистить данные браузера или удалить приложение, записи пропадут. Чтобы этого не случилось, сохраните <b>резервную копию</b> в файл и при необходимости восстановите её.</p>
+    </div>
+    <div class="btns">
+      <button class="btn s" id="exp">⬇️ Сохранить копию</button>
+      <button class="btn o" id="imp">⬆️ Восстановить</button>
+    </div>
+    <input type="file" id="file" accept="application/json,.json" class="hide">
+  </div>
+</section>
+
+<section class="tab" id="t-hist">
+  <div class="card" id="hist"></div>
+  <button class="btn o" style="width:100%" id="clr">Очистить историю</button>
+</section>
+</main>
+<nav>
+  <button class="on" data-t="calc"><span>🧮</span>Расчёт</button>
+  <button data-t="gpa"><span>📊</span>Средний балл</button>
+  <button data-t="hist"><span>🕘</span>История</button>
+</nav>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));stamp()}catch{$('stamp')&&($('stamp').textContent='⚠️ Не удалось сохранить: хранилище недоступно')}}};
+const num=v=>{const n=parseFloat(String(v).trim().replace(',','.'));return isNaN(n)?NaN:n};
+const fmt=(n,d=2)=>(+n.toFixed(d)).toString().replace('.',',');
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const buzz=()=>navigator.vibrate&&navigator.vibrate(10);
+let tt;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),1800)}
+
+let st=Object.assign({x:'',y:'',scale:'10',cm:'',mode:'round'},store.get('state',{}));
+let hist=store.get('hist',[]),subs=store.get('subs',[]);
+const SCALES=['5','10','12','20','100','custom'],MODES={round:'Математическое',up:'Вверх',down:'Вниз'};
+
+function chips(el,items,key,label){el.innerHTML='';items.forEach(v=>{const b=document.createElement('button');b.className='chip'+(st[key]===v?' on':'');b.textContent=label(v);b.onclick=()=>{st[key]=v;buzz();chips(el,items,key,label);if(key==='scale')$('cg').classList.toggle('hide',v!=='custom');calc()};el.appendChild(b)})}
+
+const sysMax=()=>st.scale==='custom'?num(st.cm):+st.scale;
+const rnd=v=>st.mode==='up'?Math.ceil(v-1e-9):st.mode==='down'?Math.floor(v+1e-9):Math.round(v);
+// минимальная доля, при которой получается оценка g
+const thrRatio=(g,S)=>st.mode==='up'?(g-1)/S:st.mode==='down'?g/S:(g-.5)/S;
+let cur=null;
+
+function calc(){
+  st.x=$('x').value;st.y=$('y').value;st.cm=$('cm').value;store.set('state',st);
+  const x=num(st.x),y=num(st.y),S=sysMax();
+  $('err').classList.toggle('hide',!(x>y));
+  if(isNaN(x)||isNaN(y)||y<=0||isNaN(S)||S<=0||x<0){cur=null;$('grade').textContent='–';$('exact').textContent=$('pct').textContent='–';$('bar').style.width='0';$('hint').textContent='';$('thrCard').classList.add('hide');return}
+  const ratio=Math.min(x/y,1),exact=ratio*S,g=rnd(exact);
+  cur={x,y,S,g,exact,pct:ratio*100};
+  $('grade').innerHTML=`${fmt(g,2)} <i>/ ${fmt(S)}</i>`;
+  $('exact').textContent=fmt(exact);$('pct').textContent=fmt(ratio*100,1)+'%';
+  $('bar').style.width=ratio*100+'%';
+  // подсказка до следующей оценки
+  if(g<S){const need=thrRatio(g+1,S)*y,d=need-x,eps=st.mode==='up'?' (больше)':'';
+    $('hint').textContent=d>0?`До оценки ${fmt(g+1)}: ещё ${fmt(d)} балл.${eps}`:''}
+  else $('hint').textContent='🎉 Максимальная оценка!';
+  buildThr(S,y,g);
+}
+function buildThr(S,y,g){
+  let list=[];
+  if(S<=20&&Number.isInteger(S))for(let i=1;i<=S;i++)list.push(i);
+  else for(let k=5;k<=10;k++){const v=Math.round(S*k/10);if(!list.includes(v))list.push(v)}
+  if(!Number.isInteger(S)||S>100){$('thrCard').classList.add('hide');return}
+  $('thr').innerHTML=list.reverse().map(n=>{const p=Math.max(0,thrRatio(n,S)*y);
+    return `<tr class="${n===g?'cur':''}"><td>Оценка ${n}</td><td>${st.mode==='up'?'больше ':'от '}${fmt(p)} из ${fmt(y)}</td></tr>`}).join('');
+  $('thrCard').classList.remove('hide');
+}
+function shareText(){return cur?`${fmt(cur.x)} из ${fmt(cur.y)} = оценка ${fmt(cur.g)} из ${fmt(cur.S)} (${fmt(cur.pct,1)}%) — Оценка+`:''}
+
+$('save').onclick=()=>{if(!cur)return toast('Введите баллы');hist.unshift({...cur,t:Date.now()});hist=hist.slice(0,100);store.set('hist',hist);buzz();toast('Сохранено в историю');renderHist()};
+$('toSub').onclick=()=>{if(!cur)return toast('Введите баллы');const n=prompt('Название предмета','');if(n===null)return;subs.push({n:n||'Предмет',g:cur.g,w:1});store.set('subs',subs);toast('Добавлено в предметы');renderSubs()};
+$('share').onclick=async()=>{if(!cur)return toast('Введите баллы');const t=shareText();
+  try{if(navigator.share)await navigator.share({text:t});else{await navigator.clipboard.writeText(t);toast('Скопировано')}}catch{}};
+
+function renderHist(){
+  $('hist').innerHTML=hist.length?hist.map((h,i)=>`<div class="li"><div><b>${fmt(h.x)} из ${fmt(h.y)}</b><small>${new Date(h.t).toLocaleString('ru',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})} · ${fmt(h.pct,1)}%</small></div><span class="badge">${fmt(h.g)}/${fmt(h.S)}</span><button class="x" data-i="${i}" aria-label="Удалить">✕</button></div>`).join(''):'<div class="empty">Здесь появятся ваши сохранённые расчёты</div>';
+  $('hist').querySelectorAll('.x').forEach(b=>b.onclick=()=>{hist.splice(+b.dataset.i,1);store.set('hist',hist);renderHist()});
+}
+$('clr').onclick=()=>{if(hist.length&&confirm('Удалить всю историю?')){hist=[];store.set('hist',hist);renderHist()}};
+
+function renderSubs(){
+  const sw=subs.reduce((a,s)=>a+s.w,0);
+  $('subs').innerHTML=subs.length?subs.map((s,i)=>`<div class="li"><div><b>${esc(s.n)}</b><small>вес ${fmt(s.w)} · вклад в среднее ${fmt(s.w/sw*100,0)}%</small></div><span class="badge">${fmt(s.g)}</span><button class="x" data-i="${i}" aria-label="Удалить">✕</button></div>`).join(''):'<div class="empty">Пока пусто. Добавьте предметы — посчитаем средний балл</div>';
+  $('subs').querySelectorAll('.x').forEach(b=>b.onclick=()=>{subs.splice(+b.dataset.i,1);store.set('subs',subs);renderSubs()});
+  $('subsHint').textContent=subs.length?'«Вклад» показывает, какую долю итога даёт предмет: вес ÷ сумма всех весов.':'';
+  const sum=subs.reduce((a,s)=>a+s.g*s.w,0),w=sw?sum/sw:0,sm=subs.length?subs.reduce((a,s)=>a+s.g,0)/subs.length:0;
+  $('avgW').textContent=sw?fmt(w):'–';$('avgS').textContent=subs.length?fmt(sm):'–';
+  if(!subs.length){$('formula').textContent='Добавьте хотя бы один предмет — здесь появится пошаговый расчёт с вашими числами.';return}
+  const cut=subs.slice(0,5),more=subs.length>5?` + … (ещё ${subs.length-5})`:'';
+  let h=`<b>1.</b> Умножаем каждую оценку на её вес и складываем:<br>${cut.map(s=>`${fmt(s.g)}×${fmt(s.w)}`).join(' + ')}${more} = <b>${fmt(sum)}</b><br>`;
+  h+=`<b>2.</b> Складываем все веса: <b>${fmt(sw)}</b><br>`;
+  h+=`<b>3.</b> Делим: ${fmt(sum)} ÷ ${fmt(sw)} = <b>${fmt(w)}</b> — средневзвешенный балл.`;
+  h+=`<br><br>Простое среднее — это сумма оценок ÷ количество предметов (${fmt(subs.reduce((a,s)=>a+s.g,0))} ÷ ${subs.length} = <b>${fmt(sm)}</b>).`;
+  if(Math.abs(w-sm)<.005)h+=' Оно совпало со средневзвешенным, потому что веса одинаковые.';
+  else h+=` Они различаются, потому что у предметов разный вес.`;
+  $('formula').innerHTML=h;
+}
+$('addSub').onclick=()=>{const g=num($('sg').value),w=$('sw').value.trim()?num($('sw').value):1;
+  if(isNaN(g)||isNaN(w)||w<=0)return toast('Проверьте оценку и вес');
+  subs.push({n:$('sn').value.trim()||'Предмет',g,w});store.set('subs',subs);
+  $('sn').value=$('sg').value=$('sw').value='';buzz();renderSubs()};
+
+function stamp(){const e=$('stamp');if(e)e.textContent='✅ Автосохранение включено · сохранено '+new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'})}
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch{}
+$('exp').onclick=()=>{const data={app:'ocenka-plus',v:1,date:new Date().toISOString(),state:st,hist,subs};
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,1)],{type:'application/json'}));
+  a.download='ocenka-plus-backup-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();toast('Копия сохранена в «Загрузки»')};
+$('imp').onclick=()=>$('file').click();
+$('file').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+  try{const d=JSON.parse(await f.text());if(d.app!=='ocenka-plus'||!Array.isArray(d.subs)||!Array.isArray(d.hist))throw 0;
+    if(!confirm(`Восстановить: ${d.subs.length} предм., ${d.hist.length} записей истории?\nТекущие данные будут заменены.`))return;
+    subs=d.subs.filter(s=>s&&isFinite(s.g)&&s.w>0).map(s=>({n:String(s.n||'Предмет').slice(0,40),g:+s.g,w:+s.w}));
+    hist=d.hist.filter(h=>h&&isFinite(h.x)&&isFinite(h.y)&&isFinite(h.g)&&isFinite(h.S));
+    store.set('subs',subs);store.set('hist',hist);renderSubs();renderHist();toast('Данные восстановлены')}
+  catch{toast('Файл не подходит')}};
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button,.tab').forEach(e=>e.classList.remove('on'));
+  b.classList.add('on');$('t-'+b.dataset.t).classList.add('on');buzz()});
+
+$('theme').onclick=()=>{const d=document.documentElement,n=(d.dataset.theme||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'))==='dark'?'light':'dark';d.dataset.theme=n;store.set('theme',n)};
+const th=store.get('theme',matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.dataset.theme=th;
+
+$('x').value=st.x;$('y').value=st.y;$('cm').value=st.cm;$('cg').classList.toggle('hide',st.scale!=='custom');
+chips($('scales'),SCALES,'scale',v=>v==='custom'?'Своя':v+'-балл.');
+chips($('modes'),Object.keys(MODES),'mode',k=>MODES[k]);
+['x','y','cm'].forEach(i=>$(i).addEventListener('input',calc));
+calc();renderHist();renderSubs();
+</script>
+</body>
+</html>
